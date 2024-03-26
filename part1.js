@@ -18,8 +18,9 @@ class BattleshipGame {
   placeShips() {
     let ships = 0;
     while (ships < this.shipCount) {
-      let row = Math.floor(Math.random() * this.boardSize);
-      let col = Math.floor(Math.random() * this.boardSize);
+      let [row, col] = [1, 2].map((item) => Math.floor(Math.random() * this.boardSize))
+      // let row = Math.floor(Math.random() * this.boardSize); // line above counts for both lines here
+      // let col = Math.floor(Math.random() * this.boardSize);
       if (!this.board[row][col]) {
         this.board[row][col] = true;
         ships++;
@@ -28,13 +29,28 @@ class BattleshipGame {
   }
 
   isValidInput(input) {
-    return (
-      input.length === 2 &&
+    const isInputLengthTwo = input.length === 2
+    const doesLetterFitBoard = 
       input.charCodeAt(0) - 65 < this.boardSize &&
-      input.charCodeAt(0) - 65 >= 0 &&
-      input[1] <= this.boardSize &&
-      input[1] > 0
+      input.charCodeAt(0) - 65 >= 0
+    const doesNumberFitBoard = input[1] <= this.boardSize && input[1] > 0;
+    return (
+      isInputLengthTwo && doesLetterFitBoard && doesNumberFitBoard
     );
+  }
+
+  hitsAndMisses = (userGuess, row, col) => {
+    if (this.guessedLocations.has(userGuess)) {
+      console.log("You already tried this location!");
+    } else {
+      this.guessedLocations.add(userGuess);
+      if (this.board[row][col]) {
+        console.log("Hit!");
+        this.remainingShips--;
+      } else {
+        console.log("You missed that one... Try another!");
+      }
+    }
   }
 
   *playTurn() {
@@ -50,18 +66,8 @@ class BattleshipGame {
       }
       let col = userGuess.charCodeAt(0) - 65;
       let row = parseInt(userGuess.charAt(1)) - 1;
-
-      if (this.guessedLocations.has(userGuess)) {
-        console.log("You already tried this location!");
-      } else {
-        this.guessedLocations.add(userGuess);
-        if (this.board[row][col]) {
-          console.log("Hit!");
-          this.remainingShips--;
-        } else {
-          console.log("You missed that one... Try another!");
-        }
-      }
+      this.hitsAndMisses(userGuess, row, col)
+      
       yield;
     }
   }
